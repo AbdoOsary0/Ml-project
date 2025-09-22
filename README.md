@@ -13,7 +13,7 @@ Python 3.x
 TensorFlow / PyTorch
 OpenCV
 NumPy / Pandas
-Matplotlib / Seabor
+Matplotlib / Seaborn
 
 traffic-sign-detection/
 │── data/ # Dataset
