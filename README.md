@@ -5,7 +5,6 @@ An intelligent Traffic Sign Recognition (TSR) system that automatically detects 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Team Members](#team-members)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -17,7 +16,6 @@ An intelligent Traffic Sign Recognition (TSR) system that automatically detects 
 - [Deployment](#deployment)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
-- [License](#license)
 - [Acknowledgments](#acknowledgments)
 
 ## 🎯 Overview
@@ -262,9 +260,6 @@ Please ensure your code:
 - Passes all existing tests
 - Includes new tests for new features
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
