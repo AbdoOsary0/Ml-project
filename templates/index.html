@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Analysis System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .main-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.8s ease-out;
+      }
+
+      .mode-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .mode-card {
+        border: 3px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mode-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .mode-card:hover::before {
+        left: 100%;
+      }
+
+      .mode-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      }
+
+      .mode-card.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .mode-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .mode-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .mode-card p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .upload-section {
+        margin: 30px 0;
+        padding: 40px;
+        border: 3px dashed #d0d0d0;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #fafafa;
+      }
+
+      .upload-section.drag-over {
+        border-color: #667eea;
+        background: #667eea10;
+        transform: scale(1.02);
+      }
+
+      .upload-section input[type="file"] {
+        display: none;
+      }
+
+      .upload-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .upload-btn:active {
+        transform: translateY(0);
+      }
+
+      .upload-info {
+        margin-top: 15px;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .file-preview {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .file-preview.show {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .preview-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .preview-icon {
+        font-size: 2rem;
+      }
+
+      .preview-info {
+        flex: 1;
+      }
+
+      .preview-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .preview-size {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .remove-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .remove-btn:hover {
+        background: #ff3838;
+        transform: scale(1.05);
+      }
+
+      .analyze-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .analyze-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      .analyze-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .results-section {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .results-section.show {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .result-card {
+        background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .result-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .confidence-badge {
+        padding: 8px 20px;
+        background: #667eea;
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      .predictions-list {
+        list-style: none;
+      }
+
+      .prediction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .prediction-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .prediction-name {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .prediction-confidence {
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      .annotated-image-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .annotated-image-container img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .detections-grid {
+        display: grid;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .detection-item {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        border-left: 4px solid #667eea;
+      }
+
+      .detection-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .frame-info {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .object-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .object-tag {
+        padding: 5px 15px;
+        background: #667eea20;
+        color: #667eea;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .stat-label {
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .loader {
+        display: none;
+        text-align: center;
+        margin: 30px 0;
+      }
+
+      .loader.show {
+        display: block;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      .loader-text {
+        margin-top: 15px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .error-message {
+        background: #ff475720;
+        border: 2px solid #ff4757;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        color: #ff4757;
+        font-weight: 600;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+        animation: shake 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+
+        25% {
+          transform: translateX(-10px);
+        }
+
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      @media (max-width: 968px) {
+        .mode-selector {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .main-card {
+          padding: 25px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚦 Traffic Analysis System</h1>
+        <p>Advanced AI-Powered Traffic Sign Recognition & Vehicle Detection</p>
+      </div>
+
+      <div class="main-card">
+        <div class="mode-selector">
+          <div class="mode-card active" data-mode="image">
+            <div class="mode-icon">📸</div>
+            <h3>Image Classification</h3>
+            <p>Single traffic sign classification</p>
+          </div>
+          <div class="mode-card" data-mode="detection">
+            <div class="mode-icon">🔍</div>
+            <h3>Image Detection</h3>
+            <p>Multiple traffic signs detection</p>
+          </div>
+          <div class="mode-card" data-mode="video">
+            <div class="mode-icon">🎥</div>
+            <h3>Video Detection</h3>
+            <p>Detect objects in video footage</p>
+          </div>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+          <input type="file" id="fileInput" accept="" />
+          <div class="upload-content">
+            <div style="font-size: 3rem; margin-bottom: 15px">📁</div>
+            <button
+              class="upload-btn"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              Choose File
+            </button>
+            <p class="upload-info" id="uploadInfo">
+              Supported formats: JPG, PNG, JPEG, BMP
+            </p>
+            <p style="color: #999; margin-top: 10px; font-size: 0.85rem">
+              or drag and drop your file here
+            </p>
+          </div>
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <div class="preview-content">
+            <div class="preview-icon" id="previewIcon">📄</div>
+            <div class="preview-info">
+              <div class="preview-name" id="fileName"></div>
+              <div class="preview-size" id="fileSize"></div>
+            </div>
+            <button class="remove-btn" onclick="removeFile()">Remove</button>
+          </div>
+        </div>
+
+        <button
+          class="analyze-btn"
+          id="analyzeBtn"
+          disabled
+          onclick="analyzeFile()"
+        >
+          Analyze File
+        </button>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <div class="loader-text">Processing your file...</div>
+        </div>
+
+        <div class="results-section" id="resultsSection"></div>
+      </div>
+    </div>
+
+    <script>
+      let selectedMode = "image";
+      let selectedFile = null;
+
+      // Mode selection
+      document.querySelectorAll(".mode-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          document
+            .querySelectorAll(".mode-card")
+            .forEach((c) => c.classList.remove("active"));
+          this.classList.add("active");
+          selectedMode = this.dataset.mode;
+          updateUploadInfo();
+          removeFile();
+        });
+      });
+
+      function updateUploadInfo() {
+        const info = document.getElementById("uploadInfo");
+        const fileInput = document.getElementById("fileInput");
+
+        if (selectedMode === "image" || selectedMode === "detection") {
+          info.textContent = "Supported formats: JPG, PNG, JPEG, BMP";
+          fileInput.accept = ".jpg,.jpeg,.png,.bmp";
+        } else {
+          info.textContent = "Supported formats: MP4, AVI, MOV, MKV";
+          fileInput.accept = ".mp4,.avi,.mov,.mkv";
+        }
+      }
+
+      // File selection
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (e) {
+          if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+          }
+        });
+
+      // Drag and drop
+      const uploadSection = document.getElementById("uploadSection");
+
+      uploadSection.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadSection.classList.add("drag-over");
+      });
+
+      uploadSection.addEventListener("dragleave", () => {
+        uploadSection.classList.remove("drag-over");
+      });
+
+      uploadSection.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadSection.classList.remove("drag-over");
+
+        if (e.dataTransfer.files.length > 0) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      function handleFile(file) {
+        selectedFile = file;
+
+        // Show preview
+        document.getElementById("filePreview").classList.add("show");
+        document.getElementById("fileName").textContent = file.name;
+        document.getElementById("fileSize").textContent = formatFileSize(
+          file.size
+        );
+
+        if (selectedMode === "video") {
+          document.getElementById("previewIcon").textContent = "🎬";
+        } else {
+          document.getElementById("previewIcon").textContent = "🖼️";
+        }
+
+        document.getElementById("analyzeBtn").disabled = false;
+
+        // Clear previous results
+        document.getElementById("resultsSection").classList.remove("show");
+        document.getElementById("errorMessage").classList.remove("show");
+      }
+
+      function removeFile() {
+        selectedFile = null;
+        document.getElementById("filePreview").classList.remove("show");
+        document.getElementById("fileInput").value = "";
+        document.getElementById("analyzeBtn").disabled = true;
+        document.getElementById("resultsSection").classList.remove("show");
+        document.getElementById("errorMessage").classList.remove("show");
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+
+      async function analyzeFile() {
+        if (!selectedFile) return;
+
+        const loader = document.getElementById("loader");
+        const resultsSection = document.getElementById("resultsSection");
+        const errorMessage = document.getElementById("errorMessage");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        // Show loader
+        loader.classList.add("show");
+        resultsSection.classList.remove("show");
+        errorMessage.classList.remove("show");
+        analyzeBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("type", selectedMode);
+
+        try {
+          const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            displayResults(data);
+          } else {
+            showError(data.error || "An error occurred during analysis");
+          }
+        } catch (error) {
+          showError("Failed to connect to server: " + error.message);
+        } finally {
+          loader.classList.remove("show");
+          analyzeBtn.disabled = false;
+        }
+      }
+
+      function displayResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+
+        if (selectedMode === "image") {
+          displayImageResults(data);
+        } else if (selectedMode === "detection") {
+          displayDetectionResults(data);
+        } else {
+          displayVideoResults(data);
+        }
+
+        resultsSection.classList.add("show");
+      }
+
+      function displayImageResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+        const confidence = (data.confidence * 100).toFixed(2);
+
+        let predictionsHTML = "";
+        if (data.all_predictions) {
+          predictionsHTML = Object.entries(data.all_predictions)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(
+              ([name, conf]) => `
+                        <li class="prediction-item">
+                            <span class="prediction-name">${name}</span>
+                            <span class="prediction-confidence">${(
+                              conf * 100
+                            ).toFixed(2)}%</span>
+                        </li>
+                    `
+            )
+            .join("");
+        }
+
+        resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">🎯 ${data.class}</div>
+                        <div class="confidence-badge">${confidence}% Confidence</div>
+                    </div>
+                    ${
+                      predictionsHTML
+                        ? `
+                        <h4 style="margin-bottom: 15px; color: #666;">Top Predictions:</h4>
+                        <ul class="predictions-list">${predictionsHTML}</ul>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+      }
+
+      function displayDetectionResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+
+        const detectionsHTML = data.detections
+          .map(
+            (det, idx) => `
+                <div class="detection-item">
+                    <div class="detection-header">
+                        <strong>Detection ${idx + 1}</strong>
+                        <span class="frame-info">${(
+                          det.confidence * 100
+                        ).toFixed(1)}% confidence</span>
+                    </div>
+                    <div>
+                        <strong>Class:</strong> ${det.class}<br>
+                        <strong>BBox:</strong> [${det.bbox.join(", ")}]
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+
+        resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">📊 Detection Summary</div>
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              data.total_detections
+                            }</div>
+                            <div class="stat-label">Total Detections</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              data.unique_classes.length
+                            }</div>
+                            <div class="stat-label">Unique Classes</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <strong>Detected Classes:</strong>
+                        <div class="object-tags" style="margin-top: 10px;">
+                            ${data.unique_classes
+                              .map(
+                                (cls) =>
+                                  `<span class="object-tag">${cls}</span>`
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                    
+                    <div class="annotated-image-container">
+                        <h4 style="margin: 20px 0 10px 0; color: #666;">Annotated Image:</h4>
+                        <img src="/processed/${
+                          data.annotated_image
+                        }" alt="Detected signs">
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">🔍 All Detections</div>
+                    <div class="detections-grid">
+                        ${detectionsHTML}
+                    </div>
+                </div>
+            `;
+      }
+
+      function displayVideoResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+        const summary = data.summary;
+
+        const detectionsHTML = data.detections
+          .slice(0, 10)
+          .map(
+            (det) => `
+                <div class="detection-item">
+                    <div class="detection-header">
+                        <strong>Frame ${det.frame}</strong>
+                        <span class="frame-info">${det.timestamp.toFixed(
+                          2
+                        )}s</span>
+                    </div>
+                    <div class="object-tags">
+                        ${det.objects
+                          .map(
+                            (obj) => `
+                            <span class="object-tag">${obj.class} (${(
+                              obj.confidence * 100
+                            ).toFixed(0)}%)</span>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+
+        resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">📊 Analysis Summary</div>
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.total_frames
+                            }</div>
+                            <div class="stat-label">Total Frames</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${summary.duration.toFixed(
+                              1
+                            )}s</div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.unique_objects.length
+                            }</div>
+                            <div class="stat-label">Object Types</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.processed_frames
+                            }</div>
+                            <div class="stat-label">Analyzed Frames</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">🔍 Detected Objects</div>
+                    <div class="detections-grid">
+                        ${detectionsHTML}
+                    </div>
+                </div>
+            `;
+      }
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        errorMessage.textContent = "⚠️ " + message;
+        errorMessage.classList.add("show");
+      }
+
+      // Initialize
+      updateUploadInfo();
+    </script>
+  </body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Analysis System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .main-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.8s ease-out;
+      }
+
+      .mode-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .mode-card {
+        border: 3px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mode-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .mode-card:hover::before {
+        left: 100%;
+      }
+
+      .mode-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      }
+
+      .mode-card.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .mode-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .mode-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .mode-card p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .upload-section {
+        margin: 30px 0;
+        padding: 40px;
+        border: 3px dashed #d0d0d0;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #fafafa;
+      }
+
+      .upload-section.drag-over {
+        border-color: #667eea;
+        background: #667eea10;
+        transform: scale(1.02);
+      }
+
+      .upload-section input[type="file"] {
+        display: none;
+      }
+
+      .upload-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .upload-btn:active {
+        transform: translateY(0);
+      }
+
+      .upload-info {
+        margin-top: 15px;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .file-preview {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .file-preview.show {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .preview-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .preview-icon {
+        font-size: 2rem;
+      }
+
+      .preview-info {
+        flex: 1;
+      }
+
+      .preview-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .preview-size {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .remove-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .remove-btn:hover {
+        background: #ff3838;
+        transform: scale(1.05);
+      }
+
+      .analyze-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .analyze-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      .analyze-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .results-section {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .results-section.show {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .result-card {
+        background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .result-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .confidence-badge {
+        padding: 8px 20px;
+        background: #667eea;
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      .predictions-list {
+        list-style: none;
+      }
+
+      .prediction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .prediction-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .prediction-name {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .prediction-confidence {
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      .detections-grid {
+        display: grid;
+        gap: 15px;
+      }
+
+      .detection-item {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        border-left: 4px solid #667eea;
+      }
+
+      .detection-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .frame-info {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .object-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .object-tag {
+        padding: 5px 15px;
+        background: #667eea20;
+        color: #667eea;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .stat-label {
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .loader {
+        display: none;
+        text-align: center;
+        margin: 30px 0;
+      }
+
+      .loader.show {
+        display: block;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      .loader-text {
+        margin-top: 15px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .error-message {
+        background: #ff475720;
+        border: 2px solid #ff4757;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        color: #ff4757;
+        font-weight: 600;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+        animation: shake 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .mode-selector {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .main-card {
+          padding: 25px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚦 Traffic Analysis System</h1>
+        <p>Advanced AI-Powered Traffic Sign Recognition & Vehicle Detection</p>
+      </div>
+
+      <div class="main-card">
+        <div class="mode-selector">
+          <div class="mode-card active" data-mode="image">
+            <div class="mode-icon">📸</div>
+            <h3>Image Classification</h3>
+            <p>Identify traffic signs from images with high accuracy</p>
+          </div>
+          <div class="mode-card" data-mode="video">
+            <div class="mode-icon">🎥</div>
+            <h3>Video Detection</h3>
+            <p>Detect and track objects in video footage</p>
+          </div>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+          <input type="file" id="fileInput" accept="" />
+          <div class="upload-content">
+            <div style="font-size: 3rem; margin-bottom: 15px">📁</div>
+            <button
+              class="upload-btn"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              Choose File
+            </button>
+            <p class="upload-info" id="uploadInfo">
+              Supported formats: JPG, PNG, JPEG, BMP
+            </p>
+            <p style="color: #999; margin-top: 10px; font-size: 0.85rem">
+              or drag and drop your file here
+            </p>
+          </div>
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <div class="preview-content">
+            <div class="preview-icon" id="previewIcon">📄</div>
+            <div class="preview-info">
+              <div class="preview-name" id="fileName"></div>
+              <div class="preview-size" id="fileSize"></div>
+            </div>
+            <button class="remove-btn" onclick="removeFile()">Remove</button>
+          </div>
+        </div>
+
+        <button
+          class="analyze-btn"
+          id="analyzeBtn"
+          disabled
+          onclick="analyzeFile()"
+        >
+          Analyze File
+        </button>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <div class="loader-text">Processing your file...</div>
+        </div>
+
+        <div class="results-section" id="resultsSection"></div>
+      </div>
+    </div>
+
+    <script>
+      let selectedMode = "image";
+      let selectedFile = null;
+
+      // Mode selection
+      document.querySelectorAll(".mode-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          document
+            .querySelectorAll(".mode-card")
+            .forEach((c) => c.classList.remove("active"));
+          this.classList.add("active");
+          selectedMode = this.dataset.mode;
+          updateUploadInfo();
+          removeFile();
+        });
+      });
+
+      function updateUploadInfo() {
+        const info = document.getElementById("uploadInfo");
+        const fileInput = document.getElementById("fileInput");
+
+        if (selectedMode === "image") {
+          info.textContent = "Supported formats: JPG, PNG, JPEG, BMP";
+          fileInput.accept = ".jpg,.jpeg,.png,.bmp";
+        } else {
+          info.textContent = "Supported formats: MP4, AVI, MOV, MKV";
+          fileInput.accept = ".mp4,.avi,.mov,.mkv";
+        }
+      }
+
+      // File selection
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (e) {
+          if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+          }
+        });
+
+      // Drag and drop
+      const uploadSection = document.getElementById("uploadSection");
+
+      uploadSection.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadSection.classList.add("drag-over");
+      });
+
+      uploadSection.addEventListener("dragleave", () => {
+        uploadSection.classList.remove("drag-over");
+      });
+
+      uploadSection.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadSection.classList.remove("drag-over");
+
+        if (e.dataTransfer.files.length > 0) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      function handleFile(file) {
+        selectedFile = file;
+
+        // Show preview
+        document.getElementById("filePreview").classList.add("show");
+        document.getElementById("fileName").textContent = file.name;
+        document.getElementById("fileSize").textContent = formatFileSize(
+          file.size
+        );
+        document.getElementById("previewIcon").textContent =
+          selectedMode === "image" ? "🖼️" : "🎬";
+        document.getElementById("analyzeBtn").disabled = false;
+
+        // Clear previous results
+        document.getElementById("resultsSection").classList.remove("show");
+        document.getElementById("errorMessage").classList.remove("show");
+      }
+
+      function removeFile() {
+        selectedFile = null;
+        document.getElementById("filePreview").classList.remove("show");
+        document.getElementById("fileInput").value = "";
+        document.getElementById("analyzeBtn").disabled = true;
+        document.getElementById("resultsSection").classList.remove("show");
+        document.getElementById("errorMessage").classList.remove("show");
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+
+      async function analyzeFile() {
+        if (!selectedFile) return;
+
+        const loader = document.getElementById("loader");
+        const resultsSection = document.getElementById("resultsSection");
+        const errorMessage = document.getElementById("errorMessage");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        // Show loader
+        loader.classList.add("show");
+        resultsSection.classList.remove("show");
+        errorMessage.classList.remove("show");
+        analyzeBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("type", selectedMode);
+
+        try {
+          const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            displayResults(data);
+          } else {
+            showError(data.error || "An error occurred during analysis");
+          }
+        } catch (error) {
+          showError("Failed to connect to server: " + error.message);
+        } finally {
+          loader.classList.remove("show");
+          analyzeBtn.disabled = false;
+        }
+      }
+
+      function displayResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+
+        if (selectedMode === "image") {
+          displayImageResults(data);
+        } else {
+          displayVideoResults(data);
+        }
+
+        resultsSection.classList.add("show");
+      }
+
+      function displayImageResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+        const confidence = (data.confidence * 100).toFixed(2);
+
+        let predictionsHTML = "";
+        if (data.all_predictions) {
+          predictionsHTML = Object.entries(data.all_predictions)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(
+              ([name, conf]) => `
+                        <li class="prediction-item">
+                            <span class="prediction-name">${name}</span>
+                            <span class="prediction-confidence">${(
+                              conf * 100
+                            ).toFixed(2)}%</span>
+                        </li>
+                    `
+            )
+            .join("");
+        }
+
+        resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">🎯 ${data.class}</div>
+                        <div class="confidence-badge">${confidence}% Confidence</div>
+                    </div>
+                    ${
+                      predictionsHTML
+                        ? `
+                        <h4 style="margin-bottom: 15px; color: #666;">Top Predictions:</h4>
+                        <ul class="predictions-list">${predictionsHTML}</ul>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+      }
+
+      function displayVideoResults(data) {
+        const resultsSection = document.getElementById("resultsSection");
+        const summary = data.summary;
+
+        const detectionsHTML = data.detections
+          .slice(0, 10)
+          .map(
+            (det) => `
+                <div class="detection-item">
+                    <div class="detection-header">
+                        <strong>Frame ${det.frame}</strong>
+                        <span class="frame-info">${det.timestamp.toFixed(
+                          2
+                        )}s</span>
+                    </div>
+                    <div class="object-tags">
+                        ${det.objects
+                          .map(
+                            (obj) => `
+                            <span class="object-tag">${obj.class} (${(
+                              obj.confidence * 100
+                            ).toFixed(0)}%)</span>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+
+        resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">📊 Analysis Summary</div>
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.total_frames
+                            }</div>
+                            <div class="stat-label">Total Frames</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${summary.duration.toFixed(
+                              1
+                            )}s</div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.unique_objects.length
+                            }</div>
+                            <div class="stat-label">Object Types</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${
+                              summary.processed_frames
+                            }</div>
+                            <div class="stat-label">Analyzed Frames</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">🔍 Detected Objects</div>
+                    <div class="detections-grid">
+                        ${detectionsHTML}
+                    </div>
+                </div>
+            `;
+      }
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        errorMessage.textContent = "⚠️ " + message;
+        errorMessage.classList.add("show");
+      }
+
+      // Initialize
+      updateUploadInfo();
+    </script>
+  </body>
+</html> -->
